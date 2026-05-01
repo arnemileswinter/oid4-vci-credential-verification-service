@@ -124,6 +124,17 @@ func (requestor *PresentationRequestor) GetRequestObjectAndSetObjectFetched(ctx 
 		tok["response_mode"] = "direct_post"
 		tok["presentation_definition"] = row.PresentationDefinition
 		tok["client_id_scheme"] = "did"
+		// client_metadata advertises the VP formats this verifier accepts.
+		// Wallets (e.g. Talao) require this to pick a compatible response format.
+		// Only ldp_vp is supported because HandleProof json.Unmarshals vp_token —
+		// JWT VP strings fail to parse, JSON-LD VP objects pass.
+		tok["client_metadata"] = map[string]interface{}{
+			"vp_formats": map[string]interface{}{
+				"ldp_vp": map[string]interface{}{
+					"proof_type": []string{"JsonWebSignature2020"},
+				},
+			},
+		}
 
 		pb, err := json.Marshal(tok)
 		if err != nil {
